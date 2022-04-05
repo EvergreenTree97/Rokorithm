@@ -3,46 +3,63 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 class Main {
-    static final int MAX = 100001;
-    static boolean visited[] = new boolean[MAX];
-
+    static boolean prime[];
+    static final int MAX = 10000;
+    static int count[];
+    static boolean visited[];
     public static void main(String args[]) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        int K = Integer.parseInt(st.nextToken());
-        Queue<Node> q = new LinkedList<>();
-        q.offer(new Node(N, 0));
-        visited[N] = true;
-        int count = Integer.MAX_VALUE;
-        while (!q.isEmpty()) {
-            Node node = q.poll();
-            if (node.n == K) {
-                count = Math.min(node.count, count);
-            }
-            if (node.n - 1 >= 0 && !visited[node.n - 1]) {
-                q.offer(new Node(node.n - 1, node.count + 1));
-                visited[node.n-1] = true;
-            }
-            if (node.n + 1 < MAX && !visited[node.n + 1]) {
-                q.offer(new Node(node.n + 1, node.count + 1));
-                visited[node.n+1] = true;
-            }
-            if (node.n * 2 < MAX && !visited[node.n * 2]) {
-                q.offer(new Node(node.n * 2, node.count + 1));
-                visited[node.n*2] = true;
+        prime = new boolean[MAX];
+        prime[0] = prime[1] = true;
+        for(int i = 2 ; i < Math.sqrt(MAX) ; i++){
+            if(!prime[i]){
+                for (int j = i * i; j < MAX; j = j + i) {
+                    prime[j] = true;
+                }
             }
         }
-        System.out.print(count);
+
+        int T = Integer.parseInt(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        for (int tc = 0; tc < T; tc++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int a = Integer.parseInt(st.nextToken());
+            int b = Integer.parseInt(st.nextToken());
+            visited = new boolean[MAX];
+            count = new int[MAX];
+            bfs(a);
+            sb.append(count[b]+"\n");
+        }
+
+
+        System.out.print(sb.toString());
+
     }
-}
+    static void bfs(int start){
+        Queue<Integer> q = new LinkedList();
+        q.offer(start);
+        visited[start] = true;
+        while(!q.isEmpty()){
+            int cur = q.poll();
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j <= 9; j++) {
+                    if(i == 0 && j == 0){
+                        continue;
+                    }
+                    int k = change(cur,i,j);
+                    if(!prime[k] && !visited[k]){
+                        count[k] = count[cur]+1;
+                        visited[k] = true;
+                        q.add(k);
+                    }
+                }
+            }
 
-class Node {
-    int n;
-    int count;
-
-    public Node(int n, int count) {
-        this.n = n;
-        this.count = count;
+        }
+    }
+    static int change(int num, int i, int v){
+        StringBuilder sb = new StringBuilder(String.valueOf(num));
+        sb.setCharAt(i,(char)(v+'0'));
+        return Integer.parseInt(sb.toString());
     }
 }
